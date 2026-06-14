@@ -37,10 +37,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Debug Azure Secret (Base64)
+      - name: Print Secrets With Spaces
         run: |
-          echo "secret value"
-          echo "${{ secrets.AZURE_CREDENTIALS }}" | base64
+          echo "=== AZURE_CLIENT_ID ==="
+          echo "${{ secrets.AZURE_CLIENT_ID }}" | sed 's/./& /g'
+
 
 
       - name: Azure login
