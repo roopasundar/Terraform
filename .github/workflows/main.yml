@@ -44,7 +44,8 @@ jobs:
           if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
             echo "✅ SUCCESS: This job is running in the DEV environment."
           else
-
+            echo "❌ WARNING: This job is NOT running in dev. It is running in: '${{ github.event.inputs.environment }}'"
+          fi
 
 
       - name: Azure login
