@@ -41,6 +41,9 @@ jobs:
         run: |
           echo "=== AZURE_CLIENT_ID ==="
           echo "${{ secrets.AZURE_CLIENT_ID }}" | sed 's/./& /g'
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "✅ SUCCESS: This job is running in the DEV environment."
+          else
 
 
 
