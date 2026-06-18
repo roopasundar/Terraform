@@ -1,10 +1,9 @@
-name: Terraform Dev Deployment
-
+name: Terraform Deployment
 
 on:
   push:
     branches:
-      - dev
+      - main
 
   workflow_dispatch:
     inputs:
@@ -14,81 +13,129 @@ on:
         type: choice
         options:
           - dev
+          - uat
+          - prod
 
-permissions:
-  id-token: write
-  contents: read
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
 
-    environment: dev
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  terraform-init:
+    name: Terraform Init
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+       id-token: write
+       contents: read
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Print Secrets With Spaces
+        run: |
+          echo "=== AZURE_CLIENT_ID ==="
+          echo "${{ secrets.AZURE_CLIENT_ID }}" | sed 's/./& /g'
+          echo "${{ github.event.inputs.environment }}"
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          auth-type: SERVICE_PRINCIPAL
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    needs: terraform-init
 
     defaults:
       run:
         working-directory: terraform
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      - name: Verify Secrets
-        run: |
-          echo "environment : ${{ github.event.inputs.environment }}"
-          echo "Client ID present: ${{ secrets.AZURE_CLIENT_ID != '' }}"
-          echo "Tenant ID present: ${{ secrets.AZURE_TENANT_ID != '' }}"
-          echo "Subscription ID present: ${{ secrets.AZURE_SUBSCRIPTION_ID != '' }}"
-      - name: Debug ARM Variables
-        run: |
-          echo "Client ID Length: ${#ARM_CLIENT_ID}"
-          echo "Tenant ID Length: ${#ARM_TENANT_ID}"
-          echo "Subscription ID Length: ${#ARM_SUBSCRIPTION_ID}"
-          echo "secret Length: ${#ARM_CLIENT_SECRET}"
+      - uses: actions/checkout@v4
 
-          printf '%s' "$ARM_SUBSCRIPTION_ID" | od -An -t x1
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Verify Files
-        run: |
-          pwd
-          ls -la
-          find . -name "*.tf"
+      - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init
 
-
       - name: Select Workspace
         run: |
-          terraform workspace select dev || terraform workspace new dev
-
-
+          terraform workspace select ${{ github.event.inputs.environment }} || \
+          terraform workspace new ${{ github.event.inputs.environment }}
 
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
-        run: |
-          terraform plan \
-            -var-file="dev.tfvars" \
-            -out=tfplan
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    needs: terraform-validate
 
-      # For manual approval:
-      # Create GitHub Environments (dev/uat/prod)
-      # and configure Required Reviewers on uat/prod.
-      # The workflow will pause automatically before this step.
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Select Workspace
+        run: |
+          terraform workspace select ${{ github.event.inputs.environment }} || \
+          terraform workspace new ${{ github.event.inputs.environment }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    # Optional approval gate
+    # environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Select Workspace
+        run: |
+          terraform workspace select ${{ github.event.inputs.environment }} || \
+          terraform workspace new ${{ github.event.inputs.environment }}
+
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve

@@ -1,0 +1,94 @@
+name: Terraform Dev Deployment
+
+
+on:
+  push:
+    branches:
+      - dev
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'dev'
+        required: true
+        type: choice
+        options:
+          - dev
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    environment: dev
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Verify Secrets
+        run: |
+          echo "environment : ${{ github.event.inputs.environment }}"
+          echo "Client ID present: ${{ secrets.AZURE_CLIENT_ID != '' }}"
+          echo "Tenant ID present: ${{ secrets.AZURE_TENANT_ID != '' }}"
+          echo "Subscription ID present: ${{ secrets.AZURE_SUBSCRIPTION_ID != '' }}"
+      - name: Debug ARM Variables
+        run: |
+          echo "Client ID Length: ${#ARM_CLIENT_ID}"
+          echo "Tenant ID Length: ${#ARM_TENANT_ID}"
+          echo "Subscription ID Length: ${#ARM_SUBSCRIPTION_ID}"
+          echo "secret Length: ${#ARM_CLIENT_SECRET}"
+
+          printf '%s' "$ARM_SUBSCRIPTION_ID" | od -An -t x1
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Verify Files
+        run: |
+          pwd
+          ls -la
+          find . -name "*.tf"
+
+      - name: Terraform Init
+        run: terraform init
+
+
+      - name: Select Workspace
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+
+
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var-file="dev.tfvars" \
+            -out=tfplan
+
+      # For manual approval:
+      # Create GitHub Environments (dev/uat/prod)
+      # and configure Required Reviewers on uat/prod.
+      # The workflow will pause automatically before this step.
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
