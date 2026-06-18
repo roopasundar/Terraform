@@ -76,7 +76,7 @@ jobs:
     name: Terraform Validate
     runs-on: ubuntu-latest
     needs: terraform-init
-
+    environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
         working-directory: terraform
