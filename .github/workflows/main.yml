@@ -45,7 +45,6 @@ jobs:
       - name: Debug Environment
         run: |
           echo "Input Environment: '${{ github.event.inputs.environment }}'"
-          echo "Job Environment: '${{ job.environment }}'"
           echo "Branch: '${{ github.ref_name }}'"
       - name: Print Secrets With Spaces
         run: |
