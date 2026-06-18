@@ -48,6 +48,7 @@ jobs:
           echo "Client ID Length: ${#ARM_CLIENT_ID}"
           echo "Tenant ID Length: ${#ARM_TENANT_ID}"
           echo "Subscription ID Length: ${#ARM_SUBSCRIPTION_ID}"
+          echo "secret Length: ${#ARM_CLIENT_SECRET}"
 
           printf '%s' "$ARM_SUBSCRIPTION_ID" | od -An -t x1
 
