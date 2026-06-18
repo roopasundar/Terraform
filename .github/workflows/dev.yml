@@ -58,12 +58,13 @@ jobs:
           ls -la
           find . -name "*.tf"
 
-      - name: Terraform Init
-        run: terraform init
 
       - name: Select Workspace
         run: |
           terraform workspace select dev
+
+      - name: Terraform Init
+        run: terraform init
 
       - name: Terraform Validate
         run: terraform validate
