@@ -27,7 +27,19 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Check Secret Exists
+        run: |
+          if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+            echo "AZURE_CREDENTIALS is empty"
+            exit 1
+          else
+            echo "AZURE_CREDENTIALS exists"
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
