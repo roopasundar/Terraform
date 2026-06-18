@@ -8,7 +8,6 @@
 *.tfplan
 
 # Sensitive files
-*.tfvars
 *.tfvars.json
 
 # VS Code
