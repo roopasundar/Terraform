@@ -81,7 +81,10 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: |
+          terraform plan \
+            -var-file="dev.tfvars" \
+            -out=tfplan
 
       # For manual approval:
       # Create GitHub Environments (dev/uat/prod)
