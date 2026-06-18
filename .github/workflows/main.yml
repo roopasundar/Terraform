@@ -28,6 +28,11 @@ jobs:
     name: Terraform Init
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     permissions:
        id-token: write
        contents: read
@@ -37,6 +42,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - name: Debug Environment
+        run: |
+          echo "Input Environment: '${{ github.event.inputs.environment }}'"
+          echo "Job Environment: '${{ job.environment }}'"
+          echo "Branch: '${{ github.ref_name }}'"
       - name: Print Secrets With Spaces
         run: |
           echo "=== AZURE_CLIENT_ID ==="
@@ -70,6 +80,11 @@ jobs:
     defaults:
       run:
         working-directory: terraform
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +110,11 @@ jobs:
     defaults:
       run:
         working-directory: terraform
-
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -120,7 +139,11 @@ jobs:
     defaults:
       run:
         working-directory: terraform
-
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     # Optional approval gate
     # environment: ${{ github.event.inputs.environment }}
 
