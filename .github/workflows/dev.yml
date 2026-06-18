@@ -43,6 +43,14 @@ jobs:
           echo "Client ID present: ${{ secrets.AZURE_CLIENT_ID != '' }}"
           echo "Tenant ID present: ${{ secrets.AZURE_TENANT_ID != '' }}"
           echo "Subscription ID present: ${{ secrets.AZURE_SUBSCRIPTION_ID != '' }}"
+      - name: Debug ARM Variables
+        run: |
+          echo "Client ID Length: ${#ARM_CLIENT_ID}"
+          echo "Tenant ID Length: ${#ARM_TENANT_ID}"
+          echo "Subscription ID Length: ${#ARM_SUBSCRIPTION_ID}"
+
+          printf '%s' "$ARM_SUBSCRIPTION_ID" | od -An -t x1
+
       - name: Azure Login
         uses: azure/login@v2
         with:
