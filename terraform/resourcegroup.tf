@@ -4,7 +4,7 @@
 
 module "gpr_resource_group" {
     source   = "./modules/resourcegroups"
-    rgname          =  var.rg_name
-    rglocation      =  var.rg_location
-    rgtags          =  var.rg_tags
+    rgname          =  var.gpr_rgname
+    rglocation      =  var.gpr_rglocation
+    rgtags          =  var.gpr_rgtags
 }

@@ -1,19 +1,19 @@
 # Resource group input varibale declaration
 # ========================================
 
-variable "rg_name" {
+variable "gpr_rgname" {
 description = "name of the resource group"
 type        = string
 default     = " "
 }
 
-variable "rg_location" {
+variable "gpr_rglocation" {
 description = "name of the resource group location"
 type        = string
 default     = ""
 }
 
-variable "rg_tags" {
+variable "gpr_rgtags" {
     type        = map(string)
     description = "Tags for the resource group"
     default = {
