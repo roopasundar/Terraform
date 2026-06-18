@@ -2,9 +2,15 @@ name: Terraform Dev Deployment
 
 
 on:
-  push:
-    branches:
-      - dev
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'dev'
+        required: true
+        type: choice
+        options:
+          - dev
+
 
 permissions:
   id-token: write
