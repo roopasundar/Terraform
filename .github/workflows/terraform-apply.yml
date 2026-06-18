@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     permissions:
-       id-token: write
-       contents: read
+      id-token: write
+      contents: read
     defaults:
       run:
         working-directory: terraform
@@ -61,4 +61,4 @@ jobs:
           name: tfplan
           path: terraform
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve -var-file="dev.tfvars"
