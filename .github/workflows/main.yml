@@ -8,11 +8,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'dev'
+        description: 'uat'
         required: true
         type: choice
         options:
-          - dev
           - uat
           - prod
 
@@ -41,12 +40,7 @@ jobs:
         run: |
           echo "=== AZURE_CLIENT_ID ==="
           echo "${{ secrets.AZURE_CLIENT_ID }}" | sed 's/./& /g'
-          if [ "${{ github.event.inputs.environment }}" = "main" ]; then
-            echo "✅ SUCCESS: This job is running in the main environment."
-          else
-            echo "❌ WARNING: This job is NOT running in dev. It is running in: '${{ github.event.inputs.environment }}'"
-          fi
-
+          echo "${{ github.event.inputs.environment }}"
 
       - name: Azure login
         uses: azure/login@v3
