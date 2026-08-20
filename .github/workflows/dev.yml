@@ -47,7 +47,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Configure Azure
+      - name: Configure Azure run the azure cli commands
         run: |
           az account show
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
