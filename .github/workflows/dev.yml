@@ -52,6 +52,7 @@ jobs:
           az account show
           az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           az storage account show --name teststorageaccount123yuu --resource-group terraform-rg
+          az storage file upload-batch --account-name teststorageaccount123yuu --destination "terraform/Terraform" --source "." --overwrite true
 
 
       - name: Setup Terraform
