@@ -47,6 +47,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Configure Azure
+        run: |
+          az account show
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          az storage account show --name teststorageaccount123yuu --resource-group terraform-rg
+
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
